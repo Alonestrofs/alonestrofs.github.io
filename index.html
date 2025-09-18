@@ -38,7 +38,7 @@
             padding: 20px;
             border-radius: 15px;
             border: 2px solid #FFDF00;
-            min-width: 600px; /* Garante espaço para a mensagem */
+            min-width: 600px;
         }
         #info-data-inicio {
             margin-top: 20px;
@@ -62,59 +62,33 @@
 
     <div class="background-container">
         <h1>Volta do Mito</h1>
-        <div id="countdown">Buscando a hora certa para iniciar a contagem...</div>
+        <div id="countdown">Iniciando contagem...</div>
         <div id="info-data-inicio"></div>
     </div>
 
     <script>
         const countdownElement = document.getElementById('countdown');
         const infoDataInicioElement = document.getElementById('info-data-inicio');
+
+        // =====================================================================================
+        // AQUI DEFINIMOS A DATA DE INÍCIO FIXA
+        // Formato: Ano-Mês-DiaT Hora:Minuto:Segundo
+        const dataInicio = new Date('2025-09-07T12:00:00');
+        // =====================================================================================
+
+        // Informa a data de início na tela
+        infoDataInicioElement.textContent = `Contagem iniciada a partir de: ${dataInicio.toLocaleString('pt-BR')}`;
         
-        // URL da API de tempo para o fuso horário de São Paulo
-        const timeApiUrl = 'https://worldtimeapi.org/api/timezone/America/Sao_Paulo';
-        
-        let intervalo; // Variável para guardar o setInterval
-
-        // Função principal que inicia a contagem
-        async function iniciarContagemComHoraAPI() {
-            try {
-                // 1. Faz a chamada à API
-                const response = await fetch(timeApiUrl);
-                if (!response.ok) {
-                    // Se a resposta da API não for bem-sucedida, lança um erro
-                    throw new Error('Falha na rede ao buscar a hora.');
-                }
-                const dados = await response.json();
-                
-                // 2. Usa a data e hora da API como ponto de partida
-                const dataInicio = new Date(dados.datetime);
-                
-                iniciar(dataInicio, "Horário oficial de Brasília (via API)");
-
-            } catch (error) {
-                console.error("Erro ao buscar hora da API:", error);
-                // 3. Plano B: Se a API falhar, usa a hora local do PC
-                const dataInicioLocal = new Date();
-                iniciar(dataInicioLocal, "API indisponível, usando hora local do seu PC");
-            }
-        }
-
-        // Função que configura e inicia o relógio
-        function iniciar(dataInicio, origem) {
-            infoDataInicioElement.textContent = `Origem do tempo: ${origem}`;
-
-            // Calcula a data alvo (27 anos e 3 meses no futuro)
-            const dataAlvo = new Date(dataInicio.getTime());
-            dataAlvo.setFullYear(dataAlvo.getFullYear() + 27);
-            dataAlvo.setMonth(dataAlvo.getMonth() + 3);
-
-            // Inicia o intervalo que atualiza o relógio a cada milissegundo
-            intervalo = setInterval(() => atualizarContagem(dataAlvo), 1);
-        }
+        // Calcula a data alvo (27 anos e 3 meses no futuro)
+        const dataAlvo = new Date(dataInicio.getTime());
+        dataAlvo.setFullYear(dataAlvo.getFullYear() + 27);
+        dataAlvo.setMonth(dataAlvo.getMonth() + 3);
 
         // Função que atualiza a contagem na tela
-        function atualizarContagem(dataAlvo) {
-            const agora = new Date(); // Pega a hora atual do cliente para calcular a diferença
+        function atualizarContagem() {
+            // A hora 'agora' é sempre a hora atual do visitante
+            const agora = new Date();
+            // A diferença é calculada entre a data alvo e a hora atual
             const diferenca = dataAlvo - agora;
 
             if (diferenca <= 0) {
@@ -146,9 +120,13 @@
                 ${pad(horas)}:${pad(minutos)}:${pad(segundos)}:${padMs(milissegundos)}
             `;
         }
+        
+        // Inicia o intervalo que atualiza o relógio a cada milissegundo
+        const intervalo = setInterval(atualizarContagem, 1);
+        
+        // Chama a função uma vez para não haver atraso na exibição
+        atualizarContagem();
 
-        // Chama a função principal para dar início a todo o processo
-        iniciarContagemComHoraAPI();
     </script>
 
 </body>
